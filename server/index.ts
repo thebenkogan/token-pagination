@@ -4,11 +4,11 @@ const PORT = 3000;
 
 Bun.serve({
   port: PORT,
-  fetch(req) {
+  async fetch(req) {
     const params = new URL(req.url).searchParams;
     const startKey = Number(params.get("continuation_token") ?? 0);
-
-    return new Response(JSON.stringify(query(startKey, 10)), {
+    const data = await query(startKey, 10);
+    return new Response(JSON.stringify(data), {
       headers: { "content-type": "application/json" },
     });
   },

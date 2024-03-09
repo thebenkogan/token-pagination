@@ -23,10 +23,11 @@ for (let i = 0; i < 10; i++) {
 
 type QueryResult = {
   data: Extraction[];
-  lastKey: number;
+  continuation_token: number;
 };
 
-export function query(start: number, size: number) {
+export async function query(start: number, size: number): Promise<QueryResult> {
+  await new Promise((resolve) => setTimeout(resolve, Math.random() * 1000));
   return {
     data: database.slice(start, start + size),
     continuation_token: start + size,

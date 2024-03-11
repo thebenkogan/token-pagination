@@ -1,13 +1,15 @@
-import { Column, usePagination, useTable } from "react-table";
+import { Column, usePagination, useSortBy, useTable } from "react-table";
 import { Extraction } from "./api";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 interface TableProps {
   extractions: Extraction[];
   onPageChange: (pageIndex: number) => void;
+  pageIndex: number;
+  isLoading: boolean;
 }
 
-function Table({ extractions, onPageChange }: TableProps) {
+function Table({ extractions, onPageChange, pageIndex, isLoading }: TableProps) {
   const columns = useMemo<Column<Extraction>[]>(
     () => [
       { accessor: "id", Header: "ID" },
@@ -29,22 +31,24 @@ function Table({ extractions, onPageChange }: TableProps) {
     prepareRow,
     page,
     canPreviousPage,
-    nextPage,
-    previousPage,
-    state: { pageIndex },
+    gotoPage,
   } = useTable(
     {
       columns,
       data: extractions,
       initialState: {
         pageIndex: 0,
+        pageSize: 10,
       },
-      manualPagination: true,
-      pageCount: -1,
       autoResetPage: false,
     },
-    usePagination
+    useSortBy,
+    usePagination,
   );
+
+  useEffect(() => {
+    gotoPage(pageIndex)
+  },[gotoPage, pageIndex])
 
   return (
     <div>
@@ -53,7 +57,7 @@ function Table({ extractions, onPageChange }: TableProps) {
           {headerGroups.map((headerGroup) => (
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps()}>{column.render("Header")}</th>
+                <th {...column.getHeaderProps(column.getSortByToggleProps())}>{column.render("Header")}</th>
               ))}
             </tr>
           ))}
@@ -85,18 +89,19 @@ function Table({ extractions, onPageChange }: TableProps) {
         </span>
         <button
           onClick={() => {
-            previousPage();
+            // previousPage();
             onPageChange(pageIndex - 1);
           }}
-          disabled={!canPreviousPage}
+          disabled={!canPreviousPage || isLoading}
         >
           {"<"}
         </button>
         <button
           onClick={() => {
-            nextPage();
+            // nextPage();
             onPageChange(pageIndex + 1);
           }}
+          disabled={isLoading}
         >
           {">"}
         </button>

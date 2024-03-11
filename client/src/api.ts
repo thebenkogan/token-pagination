@@ -40,32 +40,25 @@ export function useExtractions() {
   const [lastPageIndex, setLastPageIndex] = useState(0);
 
   useEffect(() => {
+    if (isLoading) return
     setIsLoading(true);
     fetcher(token.current).then(({ data, continuation_token }) => {
       setData((currData) => [...(currData ?? []), ...data]);
       token.current = continuation_token;
+      setPageIndex(lastPageIndex)
       setIsLoading(false);
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastPageIndex]);
 
-  // const { data, isLoading } = useQuery<ExtractionsResponse>({
-  //   queryKey: [token],
-  // });
-
   function onPageChange(newPageIndex: number) {
-    setPageIndex(newPageIndex);
+    if (isLoading) return
     if (newPageIndex > lastPageIndex) {
       setLastPageIndex(newPageIndex);
+    } else {
+      setPageIndex(newPageIndex);
     }
   }
 
-  let pageData: Extraction[] | undefined = undefined;
-  if (data) {
-    pageData =
-      (pageIndex + 1) * 10 - 1 < data.length
-        ? data.slice(pageIndex * 10, (pageIndex + 1) * 10)
-        : data.slice((pageIndex - 1) * 10);
-  }
-
-  return { data: pageData, isLoading, onPageChange };
+  return { data: data, isLoading, onPageChange, pageIndex };
 }

@@ -13,7 +13,12 @@ function App() {
     <div>
       <h1>Extractions</h1>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <Table isLoading={isLoading} extractions={data} onPageChange={onPageChange ?? (() => {})} pageIndex={pageIndex} />
+        <Table
+          isLoading={isLoading}
+          extractions={data}
+          onPageChange={onPageChange ?? (() => {})}
+          pageIndex={pageIndex}
+        />
       </div>
       {isLoading && <div>Fetching next page...</div>}
     </div>

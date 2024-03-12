@@ -9,7 +9,12 @@ interface TableProps {
   isLoading: boolean;
 }
 
-function Table({ extractions, onPageChange, pageIndex, isLoading }: TableProps) {
+function Table({
+  extractions,
+  onPageChange,
+  pageIndex,
+  isLoading,
+}: TableProps) {
   const columns = useMemo<Column<Extraction>[]>(
     () => [
       { accessor: "id", Header: "ID" },
@@ -43,12 +48,12 @@ function Table({ extractions, onPageChange, pageIndex, isLoading }: TableProps) 
       autoResetPage: false,
     },
     useSortBy,
-    usePagination,
+    usePagination
   );
 
   useEffect(() => {
-    gotoPage(pageIndex)
-  },[gotoPage, pageIndex])
+    gotoPage(pageIndex);
+  }, [gotoPage, pageIndex]);
 
   return (
     <div>
@@ -57,7 +62,9 @@ function Table({ extractions, onPageChange, pageIndex, isLoading }: TableProps) 
           {headerGroups.map((headerGroup) => (
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>{column.render("Header")}</th>
+                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                  {column.render("Header")}
+                </th>
               ))}
             </tr>
           ))}

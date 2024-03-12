@@ -3,9 +3,18 @@ import { useEffect, useRef, useState } from "react";
 
 const URL = "http://localhost:3000/";
 
-async function fetcher(token?: string): Promise<ExtractionsResponse> {
-  const params = token ? `?continuation_token=${token}` : "";
-  const res = await fetch(URL + params);
+async function fetchExtractions(
+  token?: string,
+  limit?: number
+): Promise<ExtractionsResponse> {
+  const params = new URLSearchParams();
+  if (token) {
+    params.append("continuation_token", token);
+  }
+  if (limit) {
+    params.append("limit", limit.toString());
+  }
+  const res = await fetch(URL + "?" + params.toString());
   if (!res.ok) {
     throw new Error("failed to fetch");
   }
@@ -40,19 +49,19 @@ export function useExtractions() {
   const [lastPageIndex, setLastPageIndex] = useState(0);
 
   useEffect(() => {
-    if (isLoading) return
+    if (isLoading) return;
     setIsLoading(true);
-    fetcher(token.current).then(({ data, continuation_token }) => {
+    fetchExtractions(token.current).then(({ data, continuation_token }) => {
       setData((currData) => [...(currData ?? []), ...data]);
       token.current = continuation_token;
-      setPageIndex(lastPageIndex)
+      setPageIndex(lastPageIndex);
       setIsLoading(false);
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastPageIndex]);
 
   function onPageChange(newPageIndex: number) {
-    if (isLoading) return
+    if (isLoading) return;
     if (newPageIndex > lastPageIndex) {
       setLastPageIndex(newPageIndex);
     } else {

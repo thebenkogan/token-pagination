@@ -1,4 +1,3 @@
-import { QueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
 const URL = "http://localhost:3000/";
@@ -20,14 +19,6 @@ async function fetchExtractions(
   }
   return res.json();
 }
-
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // queryFn: fetcher,
-    },
-  },
-});
 
 export type Extraction = {
   id: string;
@@ -59,6 +50,26 @@ export function useExtractions() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastPageIndex]);
+
+  useEffect(() => {
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+    const pollableExtractions =
+      data?.filter((e) => new Date(e.created) >= fifteenMinutesAgo) ?? [];
+    const interval = setInterval(() => {
+      const startToken = token.current;
+      fetchExtractions(undefined, pollableExtractions.length).then(
+        ({ data: newData }) => {
+          if (newData.length === 0 || !data) return;
+          if (token.current !== startToken) return; // this poll is stale
+          const extractionsToKeep = data.filter(
+            (e) => !newData.some((ne) => ne.id === e.id)
+          );
+          setData([...newData, ...extractionsToKeep]);
+        }
+      );
+    }, 3_000);
+    return () => clearInterval(interval);
+  }, [data]);
 
   function onPageChange(newPageIndex: number) {
     if (isLoading) return;

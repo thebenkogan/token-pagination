@@ -6,7 +6,7 @@ export type Extraction = {
 };
 
 const database: Extraction[] = [];
-const ROWS = 1_000;
+const ROWS = 100;
 
 for (let i = 0; i < ROWS; i++) {
   database.push({

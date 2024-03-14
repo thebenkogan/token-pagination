@@ -74,6 +74,7 @@ export function useExtractions() {
   function onPageChange(newPageIndex: number) {
     if (isLoading) return;
     if (newPageIndex > lastPageIndex) {
+      if (!token.current) return; // no more to fetch, ignore
       setLastPageIndex(newPageIndex);
     } else {
       setPageIndex(newPageIndex);

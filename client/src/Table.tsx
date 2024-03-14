@@ -46,6 +46,7 @@ function Table({
         pageSize: 10,
       },
       autoResetPage: false,
+      autoResetSortBy: false,
     },
     useSortBy,
     usePagination
@@ -95,19 +96,13 @@ function Table({
           Page number: {pageIndex + 1}
         </span>
         <button
-          onClick={() => {
-            // previousPage();
-            onPageChange(pageIndex - 1);
-          }}
+          onClick={() => onPageChange(pageIndex - 1)}
           disabled={!canPreviousPage || isLoading}
         >
           {"<"}
         </button>
         <button
-          onClick={() => {
-            // nextPage();
-            onPageChange(pageIndex + 1);
-          }}
+          onClick={() => onPageChange(pageIndex + 1)}
           disabled={isLoading}
         >
           {">"}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Extraction } from "../../types";
 
 const URL = "http://localhost:3000/";
 
@@ -20,29 +21,31 @@ async function fetchExtractions(
   return res.json();
 }
 
-export type Extraction = {
-  id: string;
-  name: string;
-  created: string;
-  status: "pending" | "completed" | "failed";
-};
-
 type ExtractionsResponse = {
   data: Extraction[];
   continuation_token: string;
 };
 
+const POLLING_INTERVAL_MS = 3_000;
+
 export function useExtractions() {
-  const [data, setData] = useState<Extraction[] | undefined>(undefined);
-  const token = useRef<string | undefined>(undefined);
+  const [data, setData] = useState<Extraction[]>();
+  const token = useRef<string>();
   const [isLoading, setIsLoading] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [lastPageIndex, setLastPageIndex] = useState(0);
 
+  // request synchronization refs
+  const lastRequestId = useRef(0);
+  const lastResponseId = useRef(0);
+
   useEffect(() => {
     if (isLoading) return;
     setIsLoading(true);
+    const requestId = lastRequestId.current + 1;
+    lastRequestId.current = requestId;
     fetchExtractions(token.current).then(({ data, continuation_token }) => {
+      lastResponseId.current = requestId;
       setData((currData) => [...(currData ?? []), ...data]);
       token.current = continuation_token;
       setPageIndex(lastPageIndex);
@@ -52,24 +55,26 @@ export function useExtractions() {
   }, [lastPageIndex]);
 
   useEffect(() => {
+    if (isLoading || !data) return;
     const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
     const pollableExtractions =
-      data?.filter((e) => new Date(e.created) >= fifteenMinutesAgo) ?? [];
+      data.filter((e) => new Date(e.created) >= fifteenMinutesAgo) ?? [];
     const interval = setInterval(() => {
-      const startToken = token.current;
+      const requestId = lastRequestId.current + 1;
+      lastRequestId.current = requestId;
       fetchExtractions(undefined, pollableExtractions.length).then(
         ({ data: newData }) => {
-          if (newData.length === 0 || !data) return;
-          if (token.current !== startToken) return; // this poll is stale
+          if (requestId < lastResponseId.current) return; // this poll is stale
+          lastResponseId.current = requestId;
           const extractionsToKeep = data.filter(
             (e) => !newData.some((ne) => ne.id === e.id)
           );
           setData([...newData, ...extractionsToKeep]);
         }
       );
-    }, 3_000);
+    }, POLLING_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [data]);
+  }, [data, isLoading]);
 
   function onPageChange(newPageIndex: number) {
     if (isLoading) return;
@@ -81,5 +86,5 @@ export function useExtractions() {
     }
   }
 
-  return { data: data, isLoading, onPageChange, pageIndex };
+  return { data, isLoading, onPageChange, pageIndex };
 }

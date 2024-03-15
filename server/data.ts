@@ -1,9 +1,4 @@
-export type Extraction = {
-  id: string;
-  name: string;
-  created: string;
-  status: "pending" | "completed" | "failed";
-};
+import type { Extraction } from '../types';
 
 const database: Extraction[] = [];
 const ROWS = 100;

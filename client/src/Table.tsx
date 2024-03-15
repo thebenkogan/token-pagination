@@ -1,6 +1,6 @@
 import { Column, usePagination, useSortBy, useTable } from "react-table";
-import { Extraction } from "./api";
 import { useEffect, useMemo } from "react";
+import { Extraction } from "../../types";
 
 interface TableProps {
   extractions: Extraction[];

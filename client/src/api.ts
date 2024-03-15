@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Extraction } from "../../types";
+import type { Extraction } from "../../server/data";
 
 const URL = "http://localhost:3000/";
 

@@ -1,6 +1,6 @@
 import { Column, usePagination, useSortBy, useTable } from "react-table";
 import { useEffect, useMemo } from "react";
-import { Extraction } from "../../types";
+import type { Extraction } from "../../server/data";
 
 interface TableProps {
   extractions: Extraction[];
@@ -18,7 +18,7 @@ function Table({
   const columns = useMemo<Column<Extraction>[]>(
     () => [
       { accessor: "id", Header: "ID" },
-      { accessor: "name", Header: "Name" },
+      { accessor: "configuration", Header: "Configuration" },
       {
         accessor: "created",
         Header: "Created Date",

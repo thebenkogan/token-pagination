@@ -42,10 +42,7 @@ export function useExtractions() {
   useEffect(() => {
     if (isLoading) return;
     setIsLoading(true);
-    const requestId = lastRequestId.current + 1;
-    lastRequestId.current = requestId;
     fetchExtractions(token.current).then(({ data, continuation_token }) => {
-      lastResponseId.current = requestId;
       setData((currData) => [...(currData ?? []), ...data]);
       token.current = continuation_token;
       setPageIndex(lastPageIndex);
@@ -66,10 +63,12 @@ export function useExtractions() {
         ({ data: newData }) => {
           if (requestId < lastResponseId.current) return; // this poll is stale
           lastResponseId.current = requestId;
-          const extractionsToKeep = data.filter(
-            (e) => !newData.some((ne) => ne.id === e.id)
-          );
-          setData([...newData, ...extractionsToKeep]);
+          setData((currData) => {
+            const extractionsToKeep =
+              currData?.filter((e) => !newData.some((ne) => ne.id === e.id)) ??
+              [];
+            return [...newData, ...extractionsToKeep];
+          });
         }
       );
     }, POLLING_INTERVAL_MS);
